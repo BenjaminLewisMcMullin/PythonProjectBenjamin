@@ -1,8 +1,8 @@
-from os import error, name, write
+from os import *
 # error to system errors like "file not found"
 # name to print name of operating system
 
-from tkinter import Button, Label, LabelFrame, PhotoImage, Tk, W, E, N, S, Entry, END, StringVar, Scrollbar, Toplevel
+from tkinter import Label, LabelFrame, Tk, W, E, N, S, Entry, END, Scrollbar, Toplevel, Button, PhotoImage, StringVar
 # To create gui.
 from tkinter import ttk
 # to customize the tkinter widgets in my program
@@ -15,7 +15,7 @@ import ctypes
 ctypes.windll.user32.ShowWindow( ctypes.windll.kernel32.GetConsoleWindow(),0)
 # To hide window console
 class ExpenseTracker:
-    database_name = "C:\Users\Benjamin McMullin\OneDrive\Desktop\intro to progamming lab\PythonProject\PythonProjectBenjamin\application\accountinfo.db"
+    database_name = "accountinfo.db"
     
     def execute_db_query(self,query,parameters=()):
         with sqlite3.connect(self.database_name) as conn:
@@ -26,9 +26,29 @@ class ExpenseTracker:
             conn.commit()
         return resultofquery
     
+    
+    def create_treeview(self):
+            self.tree = ttk.Treeview(height=10, style = "Treeview")
+            self.tree.grid(row=6, column=0,columnspan = 3)
+            self.tree.heading("#0", text = "Name", anchor = W)
+            
+    def create_scrollbar(self):
+            self.scrollbar = Scrollbar(orient="vertical", command = self.tree.yview)
+            self.tree.grid(row=6, column = 0, columnspan = 3)
+            
     def call_main(self):
         self.window.destroy()
         theroot = Tk()
         theroot.title("Expense Tracker")
         
         app = ExpenseTracker(theroot)
+        theroot.mainloop()
+        
+
+if __name__ == "__main__":
+    theroot= Tk()
+    theroot.title("Expense Tracker")
+    app = ExpenseTracker(theroot)
+    theroot.geometry("400x450")
+    theroot.resizable(width=False, height=False)
+    theroot.mainloop()
