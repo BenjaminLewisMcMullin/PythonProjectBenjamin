@@ -1,0 +1,34 @@
+from os import error, name, write
+# error to system errors like "file not found"
+# name to print name of operating system
+
+from tkinter import Button, Label, LabelFrame, PhotoImage, Tk, W, E, N, S, Entry, END, StringVar, Scrollbar, Toplevel
+# To create gui.
+from tkinter import ttk
+# to customize the tkinter widgets in my program
+import sqlite3
+# create a database in my program
+import pandas as pd
+# to manipulate the data in my program
+
+import ctypes
+ctypes.windll.user32.ShowWindow( ctypes.windll.kernel32.GetConsoleWindow(),0)
+# To hide window console
+class ExpenseTracker:
+    database_name = "C:\Users\Benjamin McMullin\OneDrive\Desktop\intro to progamming lab\PythonProject\PythonProjectBenjamin\application\accountinfo.db"
+    
+    def execute_db_query(self,query,parameters=()):
+        with sqlite3.connect(self.database_name) as conn:
+            print(conn)
+            print("connected to database")
+            self.cursor = conn.cursor()
+            resultofquery = self.cursor.execute(query,parameters)
+            conn.commit()
+        return resultofquery
+    
+    def call_main(self):
+        self.window.destroy()
+        theroot = Tk()
+        theroot.title("Expense Tracker")
+        
+        app = ExpenseTracker(theroot)
