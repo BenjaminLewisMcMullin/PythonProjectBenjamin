@@ -1,54 +1,49 @@
-from os import *
-# error to system errors like "file not found"
-# name to print name of operating system
+import sys
+import csv
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.Qt import *
+from PyQt5.QtChart import *
 
-from tkinter import Label, LabelFrame, Tk, W, E, N, S, Entry, END, Scrollbar, Toplevel, Button, PhotoImage, StringVar
-# To create gui.
-from tkinter import ttk
-# to customize the tkinter widgets in my program
-import sqlite3
-# create a database in my program
-import pandas as pd
-# to manipulate the data in my program
 
-import ctypes
-ctypes.windll.user32.ShowWindow( ctypes.windll.kernel32.GetConsoleWindow(),0)
-# To hide window console
-class ExpenseTracker:
-    database_name = "accountinfo.db"
-    
-    def execute_db_query(self,query,parameters=()):
-        with sqlite3.connect(self.database_name) as conn:
-            print(conn)
-            print("connected to database")
-            self.cursor = conn.cursor()
-            resultofquery = self.cursor.execute(query,parameters)
-            conn.commit()
-        return resultofquery
-    
-    
-    def create_treeview(self):
-            self.tree = ttk.Treeview(height=10, style = "Treeview")
-            self.tree.grid(row=6, column=0,columnspan = 3)
-            self.tree.heading("#0", text = "Name", anchor = W)
-            
-    def create_scrollbar(self):
-            self.scrollbar = Scrollbar(orient="vertical", command = self.tree.yview)
-            self.tree.grid(row=6, column = 0, columnspan = 3)
-            
-    def call_main(self):
-        self.window.destroy()
-        theroot = Tk()
-        theroot.title("Expense Tracker")
+class window(QMainWindow):
+    def __init__(self, widget):
+        super().__init__()
+        self.setWindowTitle("Expense Data Entry Form")
+        self.setWindowIcon(QIcon(r"C:\Users\Benjamin McMullin\OneDrive\Desktop\intro to progamming lab\PythonProject\PythonProjectBenjamin\application\icon.png"))
+        self.resize(1400,700)
         
-        app = ExpenseTracker(theroot)
-        theroot.mainloop()
+        self.menu = self.menuBar()
+        self.filepage = self.menu.addMenu("File")
         
+        export = QAction("Export to CSV", self)
+        export.setShortcut("Ctrl+.")
+        
+        exit = QAction("Exit", self)
+        exit.setShortcut("Ctrl+X")
 
+        exit.triggered.connect(lambda: application.quit())
+        
+        self.filepage.addAction(export)
+        self.filepage.addAction(exit)
+        
+        # self.setCentralWidget(widget)
+        
+    def exportcsv(self, nameoffile:str):
+        try:
+            with open(nameoffile, 'w', newline = '') as file:
+                write = csv.writer(nameoffile)
+                
+                print("CSV file has been exported successfully")
+        except Exception as m:
+            print(m)
+        
 if __name__ == "__main__":
-    theroot= Tk()
-    theroot.title("Expense Tracker")
-    app = ExpenseTracker(theroot)
-    theroot.geometry("400x450")
-    theroot.resizable(width=False, height=False)
-    theroot.mainloop()
+    application = QApplication(sys.argv)
+    
+    n = ''
+    
+    x = window(n)
+    x.show()
+    
+    sys.exit(application.exec_())
