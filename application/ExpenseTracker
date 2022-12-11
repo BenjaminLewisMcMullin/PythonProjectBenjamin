@@ -2,10 +2,124 @@ import sys
 import csv
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.Qt import *
+from PyQt5 import QtCore
 from PyQt5.QtChart import *
 
-
+class data_entry(QWidget):
+    def __init__(self):
+        super().__init__()
+        
+        self.objects = 0
+        
+        self.data = {"Phone bill": 50.5, "Gas": 30.0, "Rent": 1850.0,
+            "Car Payment": 1420.0, "Comcast": 105.0, 
+            "Public Transportation": 60.0, "Coffee": 90.5}
+        
+        # left side
+        self.tables = QTableWidget()
+        self.tables.setColumnCount(2)
+        self.tables.setHorizontalHeaderLabels(("Description", "Price"))
+        self.tables.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        
+        self.formatright = QVBoxLayout()
+        
+        # chart 
+        self.viewchart = QChartView()
+        self.viewchart.setRenderHint(QPainter.Antialiasing)
+        
+        
+        self.edit_description = QLineEdit()
+        self.edit_price = QLineEdit()
+        self.addbutton = QPushButton("Add")
+        self.clearbutton = QPushButton("Clear")
+        self.quitbutton = QPushButton("Quit")
+        self.plotbutton = QPushButton("Plot")
+        
+        self.addbutton.setEnabled(False)
+        
+        self.formatright.setSpacing(10)
+        self.formatright.addWidget(QLabel("Description"))
+        self.formatright.addWidget(self.edit_description)
+        self.formatright.addWidget(QLabel("Price"))
+        self.formatright.addWidget(self.edit_price)
+        self.formatright.addWidget(self.addbutton)
+        self.formatright.addWidget(self.plotbutton)
+        self.formatright.addWidget(self.viewchart)
+        self.formatright.addWidget(self.clearbutton)
+        self.formatright.addWidget(self.quitbutton)
+        
+        self.format = QHBoxLayout()
+        self.format.addWidget(self.tables, 50)
+        self.format.addLayout(self.formatright, 50)
+        
+        self.setLayout(self.format)
+        
+        self.quitbutton.clicked.connect(lambda: application.quit())
+        self.clearbutton.clicked.connect(self.reset)
+        self.plotbutton.clicked.connect(self.charting_graph)
+        self.addbutton.clicked.connect(self.adding_entry)
+        
+        self.edit_description.textChanged[str].connect(self.check_addbutton)
+        self.edit_price.textChanged[str].connect(self.check_addbutton)
+        
+        self.filling_table()
+        
+    def filling_table(self, info=None):
+        
+        info = self.data if not info else info
+            
+        for description, price in info.items():
+            item_description = QTableWidgetItem(description)
+            item_price = QTableWidgetItem("${0:.2f}".format(price))
+            item_price.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignCenter)
+                
+            self.tables.insertRow(self.objects)
+            self.tables.setItem(self.objects, 0, item_description)
+            self.tables.setItem(self.objects, 1, item_price)
+            self.objects += 1
+                
+    def adding_entry(self):
+        
+        description = self.edit_description.text()
+        price = self.edit_price.text()
+        
+        item_description = QTableWidgetItem(description)
+        item_price = QTableWidgetItem("${0:.2f}".format(float(price)))
+        item_price.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignCenter)
+                
+        self.tables.insertRow(self.objects)
+        self.tables.setItem(self.objects, 0, item_description)
+        self.tables.setItem(self.objects, 1, item_price)
+        self.objects += 1
+        
+        self.edit_description.setText("")
+        self.edit_price.setText("")
+        
+    def check_addbutton(self):
+        if self.edit_description.text() and self.edit_price():
+            self.addbutton.setEnabled(True)
+        else:
+            self.addbutton.setEnabled(False)
+            
+    def reset(self):
+        self.tables.setRowCount(0)
+        self.objects = 0
+        
+        charts = QChart()
+        self.viewchart.setChart(charts)
+        
+    def charting_graph(self):
+        series_type = QBarSeries()
+        
+        for i in range(self.tables.setRowCount()):
+            texts = self.tables.item(i,0).text()
+            value = float(self.tables.item(i, i).text().replace("$", ""))
+            series_type.append(texts,value)
+        
+        charts = QChart()
+        charts.addSeries(series_type)
+        charts.legend().setAlignment(QtCore.Qt.AlignTop)
+        self.chart.setChart(chart)
 class window(QMainWindow):
     def __init__(self, widget):
         super().__init__()
@@ -18,6 +132,7 @@ class window(QMainWindow):
         
         export = QAction("Export to CSV", self)
         export.setShortcut("Ctrl+.")
+        # export.triggered.connect()
         
         exit = QAction("Exit", self)
         exit.setShortcut("Ctrl+X")
@@ -27,21 +142,24 @@ class window(QMainWindow):
         self.filepage.addAction(export)
         self.filepage.addAction(exit)
         
-        # self.setCentralWidget(widget)
+        self.setCentralWidget(widget)
         
     def exportcsv(self, nameoffile:str):
         try:
             with open(nameoffile, 'w', newline = '') as file:
                 write = csv.writer(nameoffile)
-                
+                # write.writerow(
+                    
+                # )
                 print("CSV file has been exported successfully")
+                file.close()
         except Exception as m:
             print(m)
         
 if __name__ == "__main__":
     application = QApplication(sys.argv)
     
-    n = ''
+    n = data_entry()
     
     x = window(n)
     x.show()
