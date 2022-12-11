@@ -11,9 +11,7 @@ class data_entry(QWidget):
         
         self.objects = 0
         
-        self.data = {"Phone bill": 50.5, "Gas": 30.0, "Rent": 1850.0,
-            "Car Payment": 1420.0, "Comcast": 105.0, 
-            "Public Transportation": 60.0, "Coffee": 90.5}
+        self.data = {}
         
         # left side
         self.tables = QTableWidget()
@@ -70,7 +68,7 @@ class data_entry(QWidget):
             
         for description, price in info.items():
             item_description = QTableWidgetItem(description)
-            item_price = QTableWidgetItem("${0:.2f}".format(price))
+            item_price = QTableWidgetItem("{0:.2f} THB".format(price))
             item_price.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignCenter)
                 
             self.tables.insertRow(self.objects)
@@ -82,21 +80,24 @@ class data_entry(QWidget):
         
         description = self.edit_description.text()
         price = self.edit_price.text()
-        
-        item_description = QTableWidgetItem(description)
-        item_price = QTableWidgetItem("${0:.2f}".format(float(price)))
-        item_price.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignCenter)
-                
-        self.tables.insertRow(self.objects)
-        self.tables.setItem(self.objects, 0, item_description)
-        self.tables.setItem(self.objects, 1, item_price)
-        self.objects += 1
-        
-        self.edit_description.setText("")
-        self.edit_price.setText("")
-        
+       
+        try:
+            
+            item_description = QTableWidgetItem(description)
+            item_price = QTableWidgetItem("{0:.2f} THB".format(float(price)))
+            item_price.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignCenter)
+                    
+            self.tables.insertRow(self.objects)
+            self.tables.setItem(self.objects, 0, item_description)
+            self.tables.setItem(self.objects, 1, item_price)
+            self.objects += 1
+            
+            self.edit_description.setText("")
+            self.edit_price.setText("")
+        except ValueError:
+            pass
     def check_addbutton(self):
-        if self.edit_description.text() and self.edit_price():
+        if self.edit_description.text() and self.edit_price.text():
             self.addbutton.setEnabled(True)
         else:
             self.addbutton.setEnabled(False)
@@ -109,17 +110,17 @@ class data_entry(QWidget):
         self.viewchart.setChart(charts)
         
     def charting_graph(self):
-        series_type = QBarSeries()
+        series_type = QPieSeries()
         
-        for i in range(self.tables.setRowCount()):
+        for i in range(self.tables.rowCount()):
             texts = self.tables.item(i,0).text()
-            value = float(self.tables.item(i, i).text().replace("$", ""))
+            value = float(self.tables.item(i, 1).text().replace("THB", ""))
             series_type.append(texts,value)
         
         charts = QChart()
         charts.addSeries(series_type)
         charts.legend().setAlignment(QtCore.Qt.AlignTop)
-        self.chart.setChart(chart)
+        self.viewchart.setChart(charts)
 class window(QMainWindow):
     def __init__(self, widget):
         super().__init__()
