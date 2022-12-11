@@ -122,7 +122,7 @@ class data_entry(QWidget):
         charts.legend().setAlignment(QtCore.Qt.AlignTop)
         self.viewchart.setChart(charts)
 class window(QMainWindow):
-    def __init__(self, widget):
+    def __init__(self, w):
         super().__init__()
         self.setWindowTitle("Expense Data Entry Form")
         self.setWindowIcon(QIcon(r"C:\Users\Benjamin McMullin\OneDrive\Desktop\intro to progamming lab\PythonProject\PythonProjectBenjamin\application\icon.png"))
@@ -133,7 +133,7 @@ class window(QMainWindow):
         
         export = QAction("Export to CSV", self)
         export.setShortcut("Ctrl+.")
-        # export.triggered.connect()
+        export.triggered.connect(self.exportcsv)
         
         exit = QAction("Exit", self)
         exit.setShortcut("Ctrl+X")
@@ -143,26 +143,26 @@ class window(QMainWindow):
         self.filepage.addAction(export)
         self.filepage.addAction(exit)
         
-        self.setCentralWidget(widget)
+        self.setCentralWidget(w)
         
-    def exportcsv(self, nameoffile:str):
+    def exportcsv(self):
         try:
-            with open(nameoffile, 'w', newline = '') as file:
-                write = csv.writer(nameoffile)
-                # write.writerow(
-                    
-                # )
+            with open("Expenses Report.csv", 'w', newline = '') as file:
+                write = csv.writer(file)
+                write.writerow((w.tables.horizontalHeaderItem(0).text(), w.tables.horizontalHeaderItem(1).text()))
+                for rownumber in range(w.tables.rowCount()):
+                    write.writerow([w.tables.item(rownumber, 0).text(), w.tables.item(rownumber, 1).text()])
                 print("CSV file has been exported successfully")
-                file.close()
+            file.close()
         except Exception as m:
             print(m)
         
 if __name__ == "__main__":
     application = QApplication(sys.argv)
     
-    n = data_entry()
+    w = data_entry()
     
-    x = window(n)
+    x = window(w)
     x.show()
     
     sys.exit(application.exec_())
