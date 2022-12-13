@@ -126,7 +126,7 @@ class data_entry(QWidget):
 class window(QMainWindow):
     def __init__(self, w):
         super().__init__()
-        self.setWindowTitle("Expense Data Entry Form")
+        self.setWindowTitle("Daily Expense Tracker")
         self.setWindowIcon(QIcon(r"C:\Users\Benjamin McMullin\OneDrive\Desktop\intro to progamming lab\PythonProject\PythonProjectBenjamin\application\icon.png"))
         self.resize(1400,700)
         
