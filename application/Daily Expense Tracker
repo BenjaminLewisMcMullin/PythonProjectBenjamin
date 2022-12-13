@@ -12,11 +12,11 @@ class data_entry(QWidget):
         self.objects = 0
         
         self.data = {}
-        
+        self.sorted_data = {"banana": 2020}
         # left side
         self.tables = QTableWidget()
         self.tables.setColumnCount(2)
-        self.tables.setHorizontalHeaderLabels(("Description", "Price"))
+        self.tables.setHorizontalHeaderLabels(("Description", "Price THB"))
         self.tables.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         
         self.formatright = QVBoxLayout()
@@ -29,18 +29,28 @@ class data_entry(QWidget):
         self.edit_description = QLineEdit()
         self.edit_price = QLineEdit()
         self.addbutton = QPushButton("Add")
+        self.sortascend = QPushButton("Sort Ascending")
+        self.sortdescend = QPushButton("Sort Descending")
         self.clearbutton = QPushButton("Clear")
         self.quitbutton = QPushButton("Quit")
         self.plotbutton = QPushButton("Plot")
-        
+        self.openfilebutton = QPushButton("Open File")
         self.addbutton.setEnabled(False)
+        self.sortascend.setEnabled(False)
+        self.sortdescend.setEnabled(False)
         
         self.formatright.setSpacing(10)
         self.formatright.addWidget(QLabel("Description"))
         self.formatright.addWidget(self.edit_description)
-        self.formatright.addWidget(QLabel("Price"))
+        self.edit_description.setPlaceholderText("Please do not enter the Same Description")
+        self.formatright.addWidget(QLabel("Price THB"))
         self.formatright.addWidget(self.edit_price)
         self.formatright.addWidget(self.addbutton)
+        self.formatright.addWidget(self.sortascend)
+        self.formatright.addWidget(self.sortdescend)
+        
+        self.formatright.addWidget(self.openfilebutton)
+        
         self.formatright.addWidget(self.plotbutton)
         self.formatright.addWidget(self.viewchart)
         self.formatright.addWidget(self.clearbutton)
@@ -56,60 +66,110 @@ class data_entry(QWidget):
         self.clearbutton.clicked.connect(self.reset)
         self.plotbutton.clicked.connect(self.charting_graph)
         self.addbutton.clicked.connect(self.adding_entry)
+        self.sortascend.clicked.connect(self.sorttable)
+        self.sortdescend.clicked.connect(self.sortreversetable)
+        self.openfilebutton.clicked.connect(self.open_filefunc)
         
         self.edit_description.textChanged[str].connect(self.check_addbutton)
         self.edit_price.textChanged[str].connect(self.check_addbutton)
+        self.addbutton.clicked.connect(self.check_sortbuttons)
+        self.clearbutton.clicked.connect(self.check_sortbuttons)
+        self.openfilebutton.clicked.connect(self.check_sortbuttons)
+        
+        
         
         self.filling_table()
-        
+    
     def filling_table(self, info=None):
+
         
         info = self.data if not info else info
-            
+        
         for description, price in info.items():
             item_description = QTableWidgetItem(description)
-            item_price = QTableWidgetItem("{0:.2f} THB".format(price))
+            item_price = QTableWidgetItem("{0:.2f}".format(float(price)))
             item_price.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignCenter)
                 
             self.tables.insertRow(self.objects)
             self.tables.setItem(self.objects, 0, item_description)
             self.tables.setItem(self.objects, 1, item_price)
             self.objects += 1
-                
+    
     def adding_entry(self):
         
-        description = self.edit_description.text()
-        price = self.edit_price.text()
-       
-        try:
+        self.data[self.edit_description.text()] = self.edit_price.text()
+        
+        self.sorted_data[self.edit_description.text()] = self.edit_price.text()
+        self.filling_table()
+        
+        print(self.data)
+        
+        self.data = {}
+        
+    def sorttable(self):
+        
+        for k, v in self.sorted_data.items():
+            self.sorted_data[k] = float(v)
             
+        self.sorted_data = {k: v for k, v in sorted(self.sorted_data.items(), key = lambda v: v[1])}
+        print(self.sorted_data)
+
+        self.reset()
+        
+        for description, price in self.sorted_data.items():
             item_description = QTableWidgetItem(description)
-            item_price = QTableWidgetItem("{0:.2f} THB".format(float(price)))
+            item_price = QTableWidgetItem("{0:.2f}".format(float(price)))
             item_price.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignCenter)
-                    
+                
+            self.tables.insertRow(self.objects)
+            self.tables.setItem(self.objects, 0, item_description)
+            self.tables.setItem(self.objects, 1, item_price)
+            self.objects += 1
+        
+        self.objects = 0
+        
+    def sortreversetable(self):
+        
+        for k, v in self.sorted_data.items():
+            self.sorted_data[k] = float(v)
+
+        self.sorted_data = self.sorted_data = {k: v for k, v in sorted(self.sorted_data.items(), key = lambda v: v[1], reverse=True)}
+        print(self.sorted_data)
+        
+        self.reset()
+        
+        for description, price in self.sorted_data.items():
+            item_description = QTableWidgetItem(description)
+            item_price = QTableWidgetItem("{0:.2f}".format(float(price)))
+            item_price.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignCenter)
+                
             self.tables.insertRow(self.objects)
             self.tables.setItem(self.objects, 0, item_description)
             self.tables.setItem(self.objects, 1, item_price)
             self.objects += 1
             
-            self.edit_description.setText("")
-            self.edit_price.setText("")
-        except ValueError:
-            pass
+        self.objects = 0
     def check_addbutton(self):
         intvalue = self.edit_price.text()
         if self.edit_description.text() and self.edit_price.text() and intvalue.isdigit() == True:
             self.addbutton.setEnabled(True)
         else:
             self.addbutton.setEnabled(False)
-            
+    def check_sortbuttons(self):
+        if len(self.sorted_data) == 0:
+            self.sortascend.setEnabled(False)
+            self.sortdescend.setEnabled(False)
+        else:
+            self.sortascend.setEnabled(True)
+            self.sortdescend.setEnabled(True)
+          
     def reset(self):
         self.tables.setRowCount(0)
         self.objects = 0
         
         charts = QChart()
         self.viewchart.setChart(charts)
-        
+        self.data = {}
     def charting_graph(self):
         series_type = QPieSeries()
         
@@ -123,6 +183,30 @@ class data_entry(QWidget):
         charts.legend().setAlignment(QtCore.Qt.AlignTop)
         self.viewchart.setChart(charts)
         
+    def open_filefunc(self):
+        try:
+            self.fname, self._filter = QFileDialog.getOpenFileName(None, "Open "  " Data File", '.', "(*.csv)")
+            print(self.fname)
+
+            with open(self.fname, 'r') as infile:
+                reader = csv.reader(infile)
+                for row in reader:
+                    
+                    self.data[row[0]] = row[1]
+                   
+                self.sorted_data = self.data.copy()
+
+            if len(self.data) != 0 and len(self.sorted_data) !=0:
+                self.filling_table()
+                print(self.data)
+                print(self.sorted_data)
+                self.data = {}
+                
+                return(self.fname)
+        except Exception as e:
+            print(e)
+            print("Read in README file in github for proper format")
+        
 class window(QMainWindow):
     def __init__(self, w):
         super().__init__()
@@ -135,27 +219,41 @@ class window(QMainWindow):
         
         export = QAction("Export to CSV", self)
         export.setShortcut("Ctrl+.")
+        export.triggered.connect(self.savefile)
+        self.savefilename = ""
         export.triggered.connect(self.exportcsv)
-        
+    
         exit = QAction("Exit", self)
         exit.setShortcut("Ctrl+X")
 
         exit.triggered.connect(lambda: application.quit())
         
+    
         self.filepage.addAction(export)
         self.filepage.addAction(exit)
         
         self.setCentralWidget(w)
         
+    def savefile(self):
+        self.savefilename, self._filter = QFileDialog.getSaveFileName(parent=self, caption="Save Data File", filter= "csv file (*.csv)")
+        print(self.savefilename)
     def exportcsv(self):
         try:
-            with open("Expenses Report.csv", 'w', newline = '') as file:
+            with open(self.savefilename, 'a', newline = '') as file:
                 write = csv.writer(file)
-                write.writerow((w.tables.horizontalHeaderItem(0).text(), w.tables.horizontalHeaderItem(1).text()))
-                for rownumber in range(w.tables.rowCount()):
-                    write.writerow([w.tables.item(rownumber, 0).text(), w.tables.item(rownumber, 1).text()])
-                print("CSV file has been exported successfully")
-            file.close()
+                
+                if w.tables.horizontalHeaderItem(0).text() in open(self.savefilename).read() or w.tables.horizontalHeaderItem(1).text() in open(self.savefilename).read():
+                    
+                    for rownumber in range(w.tables.rowCount()):
+                        write.writerow([w.tables.item(rownumber, 0).text(), w.tables.item(rownumber, 1).text()])
+                    print("CSV file has been exported successfully")
+                    file.close()
+                else:
+                    write.writerow((w.tables.horizontalHeaderItem(0).text(), w.tables.horizontalHeaderItem(1).text()))
+                    for rownumber in range(w.tables.rowCount()):
+                            write.writerow([w.tables.item(rownumber, 0).text(), w.tables.item(rownumber, 1).text()])
+                    print("CSV file has been exported successfully")
+                    file.close()
         except Exception as m:
             print(m)
         
