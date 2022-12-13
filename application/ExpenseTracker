@@ -122,6 +122,7 @@ class data_entry(QWidget):
         charts.addSeries(series_type)
         charts.legend().setAlignment(QtCore.Qt.AlignTop)
         self.viewchart.setChart(charts)
+        
 class window(QMainWindow):
     def __init__(self, w):
         super().__init__()
