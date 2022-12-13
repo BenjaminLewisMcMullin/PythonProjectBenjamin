@@ -97,7 +97,8 @@ class data_entry(QWidget):
         except ValueError:
             pass
     def check_addbutton(self):
-        if self.edit_description.text() and self.edit_price.text():
+        intvalue = self.edit_price.text()
+        if self.edit_description.text() and self.edit_price.text() and intvalue.isdigit() == True:
             self.addbutton.setEnabled(True)
         else:
             self.addbutton.setEnabled(False)
